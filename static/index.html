@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+        <style>
+            .chatStrateGPT{
+                position:absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: aliceblue;
+                display:flex;
+                justify-content: center;
+            }
+            .centerDiv{
+                max-width: 1080px;
+                width: calc(100vw - 120px);
+            }
+            .silvestre{
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+            }
+            .silvestre img{
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 65%;
+            }
+            #chatForm{
+                width: 90vw;
+                max-width: 1080px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 80px;
+            }
+            #chatQuestion{
+                height: 50px;
+                border: solid black 1px;
+                width: 100%;
+                padding: 0 30px;
+                border-radius: 6px;
+            }
+            #chatSubmit{
+                background: none;
+                border: none;
+                position: absolute;
+                top: 50%;
+                right: 0px;
+                transform: translateY(-50%);
+                font-size: 20px;
+            }
+            .chatResponseDiv{
+                background: none;
+                display: flex;
+                flex-direction: column-reverse;
+                overflow-y: scroll;
+                overflow-x: hidden;
+                z-index: 1;
+                max-height: 80vh;
+            }
+            .chatResponse{
+                width: 100%;
+                background: aliceblue;
+            }
+            .chatAnswer{
+                padding: 25px 60px 30px;
+            }
+            .chatResponseRecommendation{
+                padding: 25px 60px 30px;
+                background: #eee;
+                width: auto;
+                position: relative;
+                margin-bottom: 10px;
+            }
+            .chatResponseRecommendation i{
+                position:absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 30px;
+                bottom: 30px
+            }
+            .chatResponseRecommendation img{
+                width: 100%;
+            }
+            .chatRecommendationContent{
+                width: 100%;
+                overflow: hidden;
+                height: 45px;
+                max-height: fit-content;
+                margin: 0 0 50px 0;
+            }
+            .chatResponseRecommendation summary{
+                background: white;
+                padding: 10px 30px 7px;
+            }
+        </style>
+        
+    </head>
+    <body style="background-color: tan;">
+        <div class="chatResponse" style="display: none;" id="chatResponseTemplate">
+            <div class="chatAnswer">
+                <p class="chatQuestionText" style="font-weight:bold;color:#1c0bb6;"></p>
+                <p class="chatAnswerText"></p>
+            </div>
+        </div>
+        <div class="chatResponseRecommendation" id="chatResponseRecommendationTemplate" style="display:none;">
+            <p style="display: inline-block;color:#1c0bb6">Further reading:</p>
+            <details><summary><p class="chatRecommendationTitle" style="font-weight:bold;color:#1c0bb6; display:inline-block" href="/"></p><a class="chatRecommendationLink" style="font-weight:bold;color:#1c0bb6" href="/"></p></a></summary>
+                <p></p></details>
+        </div>
+        <div class="chatStrateGPT">
+            <div class="centerDiv">
+                <div class="chatResponseDiv" id="chatResponseDiv">
+                    <div class="chatResponse">
+                        <div class="chatAnswer">
+                            <p class="chatQuestionText" style="font-weight:bold;color:#0e20be;">StrateGPT</p>
+                            <p class="chatAnswerText">### Tablas de MySQL, con sus propiedades, tipos, valores default y condición NOT NULL (donde aplique).<br/>
+                                # orders(order_id int, supplier_id int NOT NULL, account_id int NOT NULL, date_ordered date DEFAULT (CURDATE()), status enum("planeado","empezado","finalizado pero sin cobrar","finalizado y cobrado") DEFAULT "planeado", total_cost real NOT NULL, number_of_items int NOT NULL, date_arrived date, is_from_project boolean DEFAULT FALSE)<br/>
+                                # suppliers(supplier_id int, name varchar(64) NOT NULL, location varchar(255) NOT NULL, product_category varchar(255) NOT NULL)<br/>
+                                # project_workers(project_worker_id int, project_id int NOT NULL, worker_id int NOT NULL, project_worker_type enum("gestionador de proyectos", "jardinero", "diseñador", "transportista") NOT NULL)<br/>
+                                # transactions(transaction_id int, project_id int NOT NULL, worker_id int NOT NULL, account_id int NOT NULL, amount real NOT NULL, notes varchar(65500), description varchar(3000) NOT NULL, is_from_project boolean DEFAULT FALSE, payments_left int DEFAULT 0, date_incurred date DEFAULT (CURDATE()), date_next_payment date, number_of_transactions int NOT NULL, is_billable boolean NOT NULL)<br/>
+                                # workers(worker_id int, name varchar(255) NOT NULL, job_description varchar(255) NOT NULL, rfc varchar(30) NOT NULL, curp varchar(30) NOT NULL)<br/>
+                                # items(item_id int, order_id int NOT NULL, name varchar(64) NOT NULL, notes varchar(3000), cost real NOT NULL, amount int NOT NULL, is_available boolean)<br/>
+                                # orders(order_id int, supplier_id int NOT NULL, project_id int NOT NULL, account_id int NOT NULL, date_ordered date DEFAULT (CURDATE()), status enum("planeado","empezado","finalizado pero sin cobrar","finalizado y cobrado") DEFAULT "planeado", total_cost real NOT NULL, number_of_items int NOT NULL, date_arrived date, is_from_project boolean DEFAULT FALSE)<br/>
+                                # projects(project_id int, client_id int NOT NULL, date_started date NOT NULL, is_finished boolean DEFAULT FALSE, date_finished date, has_emergency boolean DEFAULT FALSE)<br/>
+                                # accounts(account_id int, balance real DEFAULT 0, type enum("BBVA Bancomer", "efectivo", "Santander", "Fondeadora", "Banorte", "Banco Azteca", "HSBC", "Scotiabank", "Inbursa", "Banamex", "Banco del Bajío", "Banregio", "Sabadell") NOT NULL, clabe varchar(64) NOT NULL)<br/>
+                                # clients(client_id int, name varchar(255) NOT NULL, location varchar(255) NOT NULL, sentiment int DEFAULT 0, notes varchar(12000)) -- Sentiment describe la relación, con 0 siendo pésima relación y 100 siendo la mejor relación imaginable.<br/>
+                                ###<br/>
+                                Nunca asumas ni inventes información. Si te hace falta información, no la asumas, pregúntala. Asegurate de preguntar toda la información requerida para crear el query. Siempre usa markdown para indicar queries.<br/>
+                                ### Ejemplo de creación de query con suficiente información:<br/>
+                                # prompt: Incrementa en 300 el balance de la cuenta de BBVA.<br/>
+                                # query 1: sql UPDATE accounts SET balance = balance + 300 WHERE type = "BBVA Bancomer";<br/>
+                                ### Fin de ejemplo de creación de query con suficiente información.<br/>
+                                Si no tienes información suficiente para responder el query, responde qué te hace falta en lugar de generar el query, por ejemplo:<br/>
+                                ### Ejemplo de creación de query sin suficiente información:<br/>
+                                # prompt: Crea una nueva órden.<br/>
+                                # info: Requiero más información para crear la órden. Requiero saber: el nombre o número de identificación del proveedor, el nombre o número de usuario de la cuenta con que se va a pagar la órden, la fecha de cúando se ordenó (si no me das esta información, asumiré que se ordenó hoy), el estado, que puede ser: "planeado","empezado","finalizado pero sin cobrar","finalizado y cobrado" (si no me dices cuando, asumiré que está planeado), su costo total, la cantidad de items, cuando se cumple el pedido (si sabemos esa información, en caso contrario, no hace falta indicarlo) y si es de un proyecto (si no me das esa información, asumiré que no es de un proyecto).<br/>
+                                ### Fin de ejemplo de creación de query sin suficiente información.<br/>
+                                prompt:
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="silvestre">
+                    <image src="/static/chatSprite.svg"></image>
+                </div> -->
+                <div id="chatForm">
+                    <input type="text" placeholder="Ask me anything!" name="chatQuestion" id="chatQuestion" rows="3" cols="50">
+                    <button id="chatSubmit" onclick="chatSubmit()"> <i class="las la-angle-right"></i> </button>
+                </div>
+            </div>
+        </div>
+        <script>
+            var chatHistory = [{'question':'', 'answer':''},{'question':'', 'answer':''},{'question':'', 'answer':''},{'question':'', 'answer':''},{'question':'', 'answer':''}]
+            var chatCounter = 0;
+
+            var isChatActive = true;
+
+            const chatResponseTemplate = document.querySelector('#chatResponseTemplate');
+            const chatRecommendationResponseTemplate = document.querySelector('#chatResponseRecommendationTemplate');
+            const chatInput = document.getElementById("chatQuestion");
+            const debouncedChatSubmit = debounce(chatSubmit, 300);
+
+
+            chatInput.addEventListener("keypress", function(event) {
+            if (event.keyCode == 13) {
+                debouncedChatSubmit();
+            }
+            });
+
+            function addToChat(text, responder, style){
+                response = chatResponseTemplate.cloneNode(true);
+                response.removeAttribute('style');
+                response.removeAttribute('id');
+                response.setAttribute('style', style)
+                response.querySelector('.chatQuestionText').textContent = responder;
+                response.querySelector('.chatAnswerText').textContent = text;
+                responseDiv = document.querySelector('#chatResponseDiv');
+                firstChild = responseDiv.firstChild;
+                responseDiv.insertBefore(response, firstChild);
+            }
+
+            function addRecommendationsToChat(recommendations){
+                for(let i = 0; i < recommendations.length; i++){
+                    setTimeout(() => {
+                        response = chatRecommendationResponseTemplate.cloneNode(true);
+                        response.removeAttribute('style');
+                        response.removeAttribute('id');
+                        response.querySelector('.chatRecommendationTitle').textContent = `DATA del query pasado:`;
+                        response.querySelector('.chatRecommendationLink').remove()
+                        let isTextContentShown = false;
+                        response.querySelector('details > p').textContent = recommendations[i];
+                        responseDiv = document.querySelector('#chatResponseDiv');
+                        firstChild = responseDiv.firstChild;
+                        responseDiv.insertBefore(response, firstChild);
+                    }, (2000 + (i * 400)))
+                }
+            }
+
+            function chatSubmit(){
+                if (! isChatActive){
+                    return;
+                }
+                isChatActive = false;
+                question = document.querySelector('#chatQuestion').value;
+                document.querySelector('#chatSubmit').setAttribute('disabled', 'disabled');
+                chatInput.value = '';
+
+                addToChat(question, 'You', 'background:white;');
+
+                fetch(  '/chatStrateGPT',{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type' : 'application/json',
+                        },
+                        body: JSON.stringify({'question':question, 'history':chatHistory})
+                }).then((res) =>{res.json().then( (data) => {
+                    chatHistory[chatCounter % 5]['question'] = question; 
+                    chatHistory[chatCounter++ % 5]['answer'] = data['answer'];
+                    addToChat(data['answer'], 'StrateGPT', '');
+                    addRecommendationsToChat(data['data']);
+                    document.querySelector('#chatSubmit').removeAttribute('disabled');
+                    isChatActive = true;
+                })})
+            }
+
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        </script>
+    </body>
+</html>

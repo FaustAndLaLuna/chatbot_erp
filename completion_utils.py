@@ -1,0 +1,60 @@
+import textwrap as tr
+from typing import List, Dict, Optional
+
+from tenacity import retry, stop_after_attempt, wait_random_exponential, wait_random
+from dotenv import load_dotenv
+
+import openai, os
+
+load_dotenv()
+openai_secret = os.environ['openai_secret']
+openai_org = os.environ['openai_org']
+
+openai.organization = openai_org
+openai.api_key = openai_secret
+
+# @retry(wait=wait_random(min=3, max=9), stop=stop_after_attempt(6))
+def get_ChatGPT_response(question:str, history_map, model='gpt-3.5-turbo') -> str:
+	with open('./dt_prompt.prompt', 'r', encoding='utf-8') as file:
+		query_content = """### Tablas de MySQL, con sus propiedades, tipos, valores default y condición NOT NULL (donde aplique).
+# orders(order_id int, supplier_id int NOT NULL, account_id int NOT NULL, date_ordered date DEFAULT (CURDATE()), status enum("planeado","empezado","finalizado pero sin cobrar","finalizado y cobrado") DEFAULT "planeado", total_cost real NOT NULL, number_of_items int NOT NULL, date_arrived date, is_from_project boolean DEFAULT FALSE)
+# suppliers(supplier_id int, name varchar(64) NOT NULL, location varchar(255) NOT NULL, product_category varchar(255) NOT NULL)
+# project_workers(project_worker_id int, project_id int NOT NULL, worker_id int NOT NULL, project_worker_type enum("gestionador de proyectos", "jardinero", "diseñador", "transportista") NOT NULL)
+# transactions(transaction_id int, project_id int NOT NULL, worker_id int NOT NULL, account_id int NOT NULL, amount real NOT NULL, notes varchar(65500), description varchar(3000) NOT NULL, is_from_project boolean DEFAULT FALSE, payments_left int DEFAULT 0, date_incurred date DEFAULT (CURDATE()), date_next_payment date, number_of_transactions int NOT NULL, is_billable boolean NOT NULL)
+# workers(worker_id int, name varchar(255) NOT NULL, job_description varchar(255) NOT NULL, rfc varchar(30) NOT NULL, curp varchar(30) NOT NULL)
+# items(item_id int, order_id int NOT NULL, name varchar(64) NOT NULL, notes varchar(3000), cost real NOT NULL, amount int NOT NULL, is_available boolean)
+# orders(order_id int, supplier_id int NOT NULL, project_id int NOT NULL, account_id int NOT NULL, date_ordered date DEFAULT (CURDATE()), status enum("planeado","empezado","finalizado pero sin cobrar","finalizado y cobrado") DEFAULT "planeado", total_cost real NOT NULL, number_of_items int NOT NULL, date_arrived date, is_from_project boolean DEFAULT FALSE)
+# projects(project_id int, client_id int NOT NULL, date_started date NOT NULL, is_finished boolean DEFAULT FALSE, date_finished date, has_emergency boolean DEFAULT FALSE)
+# accounts(account_id int, balance real DEFAULT 0, type enum("BBVA Bancomer", "efectivo", "Santander", "Fondeadora", "Banorte", "Banco Azteca", "HSBC", "Scotiabank", "Inbursa", "Banamex", "Banco del Bajío", "Banregio", "Sabadell") NOT NULL, clabe varchar(64) NOT NULL)
+# clients(client_id int, name varchar(255) NOT NULL, location varchar(255) NOT NULL, sentiment int DEFAULT 0, notes varchar(12000)) -- Sentiment describe la relación, con 0 siendo pésima relación y 100 siendo la mejor relación imaginable.
+###
+Nunca asumas ni inventes información. Si te hace falta información, no la asumas, pregúntala. Asegurate de preguntar toda la información requerida para crear el query. Siempre usa markdown para indicar queries.
+### Ejemplo de creación de query con suficiente información:
+# prompt: Incrementa en 300 el balance de la cuenta de BBVA.
+# query 1: ```sql UPDATE accounts SET balance = balance + 300 WHERE type = "BBVA Bancomer";```
+### Fin de ejemplo de creación de query con suficiente información.
+Si no tienes información suficiente para responder el query, responde qué te hace falta en lugar de generar el query, por ejemplo:
+### Ejemplo de creación de query sin suficiente información:
+# prompt: Crea una nueva órden.
+# info: Requiero más información para crear la órden. Requiero saber: el nombre o número de identificación del proveedor, el nombre o número de usuario de la cuenta con que se va a pagar la órden, la fecha de cúando se ordenó (si no me das esta información, asumiré que se ordenó hoy), el estado, que puede ser: "planeado","empezado","finalizado pero sin cobrar","finalizado y cobrado" (si no me dices cuando, asumiré que está planeado), su costo total, la cantidad de items, cuando se cumple el pedido (si sabemos esa información, en caso contrario, no hace falta indicarlo) y si es de un proyecto (si no me das esa información, asumiré que no es de un proyecto).
+### Fin de ejemplo de creación de query sin suficiente información.
+prompt: """.replace('\t','').replace('  ', ' ')
+	
+	query = []
+	for map in history_map:
+		if map['question'] != '':
+			query.append({'role': 'user', 'content' : map['question'].replace('\n', ' ').replace('  ',' ').replace('  ',' ').replace('  ',' ')})
+			query.append({'role': 'assistant', 'content' : map['answer'].replace('\n', ' ').replace('  ',' ').replace('  ',' ').replace('  ',' ')})
+			
+	query.append({'role': 'user', 'content': query_content+f' {question}' })
+
+	res = openai.ChatCompletion.create(
+		model=model,
+		messages=query,
+		temperature=0.3
+	)
+	ans = res['choices'][0]['message']['content'].replace('\n', ' ')
+	
+	print(ans)
+
+	return res['choices'][0]['message']['content']
